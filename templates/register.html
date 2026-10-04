@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Account | CipherVault</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-family: Arial, sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at top,
+                    #1b1430 0%,
+                    #0b0b12 45%,
+                    #060609 100%
+                );
+
+            color: #f4f4f5;
+        }
+
+        .register-wrapper {
+
+            width: 100%;
+
+            max-width: 450px;
+
+            padding: 24px;
+        }
+
+        .register-card {
+
+            padding: 38px;
+
+            background: rgba(18, 18, 30, 0.92);
+
+            border: 1px solid rgba(139, 92, 246, 0.25);
+
+            border-radius: 20px;
+
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.45),
+                0 0 35px rgba(139, 92, 246, 0.08);
+        }
+
+        .logo {
+
+            text-align: center;
+
+            margin-bottom: 28px;
+        }
+
+        .logo-icon {
+
+            font-size: 42px;
+
+            color: #a78bfa;
+
+            margin-bottom: 8px;
+        }
+
+        .logo h1 {
+
+            margin: 0;
+
+            font-size: 30px;
+        }
+
+        .logo h1 span {
+
+            color: #a78bfa;
+        }
+
+        .logo p {
+
+            margin-top: 9px;
+
+            color: #71717a;
+
+            font-size: 13px;
+        }
+
+        .form-group {
+
+            margin-bottom: 18px;
+        }
+
+        label {
+
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #d4d4d8;
+
+            font-size: 13px;
+
+            font-weight: 600;
+        }
+
+        input {
+
+            width: 100%;
+
+            padding: 13px 14px;
+
+            border: 1px solid #27272a;
+
+            border-radius: 10px;
+
+            background: #0d0d14;
+
+            color: #f4f4f5;
+
+            outline: none;
+
+            font-size: 14px;
+
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        input:focus {
+
+            border-color: #8b5cf6;
+
+            box-shadow:
+                0 0 0 3px rgba(139, 92, 246, 0.10);
+        }
+
+        .password-wrapper {
+
+            position: relative;
+        }
+
+        .password-wrapper input {
+
+            padding-right: 65px;
+        }
+
+        .show-password {
+
+            position: absolute;
+
+            right: 12px;
+
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            border: none;
+
+            background: transparent;
+
+            color: #8b8b96;
+
+            cursor: pointer;
+
+            font-size: 12px;
+        }
+
+        .show-password:hover {
+
+            color: #c4b5fd;
+        }
+
+        .register-button {
+
+            width: 100%;
+
+            padding: 13px;
+
+            margin-top: 7px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: #7c3aed;
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .register-button:hover {
+
+            background: #8b5cf6;
+
+            transform: translateY(-1px);
+        }
+
+        .message {
+
+            padding: 11px 13px;
+
+            margin-bottom: 18px;
+
+            border-radius: 9px;
+
+            font-size: 13px;
+        }
+
+        .error-message {
+
+            background: rgba(239, 68, 68, 0.08);
+
+            border: 1px solid rgba(239, 68, 68, 0.18);
+
+            color: #fca5a5;
+        }
+
+        .success-message {
+
+            background: rgba(34, 197, 94, 0.08);
+
+            border: 1px solid rgba(34, 197, 94, 0.18);
+
+            color: #86efac;
+        }
+
+        .login-link {
+
+            text-align: center;
+
+            margin-top: 22px;
+
+            color: #71717a;
+
+            font-size: 13px;
+        }
+
+        .login-link a {
+
+            color: #a78bfa;
+
+            text-decoration: none;
+
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+
+            color: #c4b5fd;
+        }
+
+        .footer {
+
+            text-align: center;
+
+            margin-top: 23px;
+
+            color: #52525b;
+
+            font-size: 11px;
+
+            line-height: 1.6;
+        }
+
+        @media (max-width: 500px) {
+
+            .register-card {
+
+                padding: 28px 22px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="register-wrapper">
+
+    <div class="register-card">
+
+        <div class="logo">
+
+            <div class="logo-icon">⬡</div>
+
+            <h1>
+                Cipher<span>Vault</span>
+            </h1>
+
+            <p>
+                Create your security lab account
+            </p>
+
+        </div>
+
+
+        {% if error %}
+
+        <div class="message error-message">
+
+            {{ error }}
+
+        </div>
+
+        {% endif %}
+
+
+        {% if success %}
+
+        <div class="message success-message">
+
+            {{ success }}
+
+        </div>
+
+        {% endif %}
+
+
+        <form method="POST"
+              action="{{ url_for('main.register') }}">
+
+            <!-- CSRF PROTECTION -->
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+
+            <div class="form-group">
+
+                <label for="username">
+
+                    Username
+
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Choose a username"
+                    autocomplete="username"
+                    minlength="3"
+                    maxlength="30"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="email">
+
+                    Email Address
+
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">
+
+                    Password
+
+                </label>
+
+                <div class="password-wrapper">
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Create a password"
+                        autocomplete="new-password"
+                        minlength="8"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        onclick="togglePassword('password', this)">
+
+                        Show
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="confirm_password">
+
+                    Confirm Password
+
+                </label>
+
+                <div class="password-wrapper">
+
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        name="confirm_password"
+                        placeholder="Re-enter your password"
+                        autocomplete="new-password"
+                        minlength="8"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        onclick="togglePassword('confirm_password', this)">
+
+                        Show
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="register-button">
+
+                Create Account
+
+            </button>
+
+        </form>
+
+
+        <div class="login-link">
+
+            Already have an account?
+
+            <a href="{{ url_for('main.login') }}">
+
+                Sign in
+
+            </a>
+
+        </div>
+
+
+        <div class="footer">
+
+            CipherVault<br>
+
+            Understand. Test. Secure.
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function togglePassword(fieldId, button) {
+
+    const field =
+        document.getElementById(fieldId);
+
+    if (field.type === "password") {
+
+        field.type = "text";
+
+        button.textContent = "Hide";
+
+    } else {
+
+        field.type = "password";
+
+        button.textContent = "Show";
+
+    }
+
+}
+
+</script>
+
+</body>
+
+</html>

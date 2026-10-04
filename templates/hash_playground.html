@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Hash Playground | CipherVault</title>
+
+    <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}"
+    >
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .hash-page {
+            min-height: 100vh;
+            padding: 40px 7%;
+        }
+
+        .hash-header {
+            max-width: 900px;
+            margin-bottom: 35px;
+        }
+
+        .back-link {
+            color: #a78bfa;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: #c4b5fd;
+        }
+
+        .hash-header h1 {
+            font-size: 42px;
+            margin: 20px 0 12px;
+        }
+
+        .hash-header p {
+            color: #a1a1aa;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .tag-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .tag {
+            padding: 7px 13px;
+            border-radius: 20px;
+            border: 1px solid rgba(167, 139, 250, 0.25);
+            background: rgba(124, 58, 237, 0.08);
+            color: #c4b5fd;
+            font-size: 13px;
+        }
+
+        .hash-card {
+            max-width: 1100px;
+            background: rgba(17, 17, 27, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            margin-bottom: 25px;
+        }
+
+        .hash-card h2 {
+            margin-top: 0;
+            font-size: 21px;
+        }
+
+        .hash-card-description {
+            color: #a1a1aa;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .input-label {
+            display: block;
+            margin: 22px 0 8px;
+            color: #d4d4d8;
+            font-size: 14px;
+        }
+
+        .hash-input {
+            width: 100%;
+            min-height: 120px;
+            box-sizing: border-box;
+            resize: vertical;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #27272a;
+            background: #09090b;
+            color: #f4f4f5;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .hash-input:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+        }
+
+        .hash-button {
+            margin-top: 16px;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #7c3aed, #9333ea);
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .hash-button:hover {
+            opacity: 0.92;
+        }
+
+        .hash-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-box {
+            display: none;
+            margin-top: 18px;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(248, 113, 113, 0.25);
+            background: rgba(248, 113, 113, 0.06);
+            color: #fca5a5;
+            font-size: 14px;
+        }
+
+        .error-box.show {
+            display: block;
+        }
+
+        .hash-results {
+            display: none;
+            margin-top: 25px;
+        }
+
+        .hash-results.show {
+            display: block;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .result-item {
+            background: #09090b;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .result-title {
+            font-size: 13px;
+            color: #a1a1aa;
+            margin-bottom: 10px;
+        }
+
+        .hash-value {
+            word-break: break-all;
+            color: #ddd6fe;
+            font-family: "Courier New", monospace;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .copy-button {
+            margin-top: 12px;
+            padding: 7px 11px;
+            border-radius: 7px;
+            border: 1px solid #3f3f46;
+            background: transparent;
+            color: #d4d4d8;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .copy-button:hover {
+            background: #18181b;
+        }
+
+        .stats {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .stat {
+            color: #a1a1aa;
+            font-size: 13px;
+        }
+
+        .stat strong {
+            color: #f4f4f5;
+        }
+
+        .avalanche-section {
+            max-width: 1100px;
+            background: rgba(17, 17, 27, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 28px;
+        }
+
+        .avalanche-section h2 {
+            margin-top: 0;
+        }
+
+        .avalanche-section p {
+            color: #a1a1aa;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-top: 20px;
+        }
+
+        .comparison-box {
+            background: #09090b;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .comparison-box h3 {
+            margin-top: 0;
+            font-size: 15px;
+        }
+
+        .comparison-value {
+            margin-top: 12px;
+            word-break: break-all;
+            color: #ddd6fe;
+            font-family: "Courier New", monospace;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .avalanche-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .compare-button {
+            margin-top: 18px;
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #3f3f46;
+            border-radius: 10px;
+            background: #18181b;
+            color: #f4f4f5;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .compare-button:hover {
+            background: #27272a;
+        }
+
+        .avalanche-result {
+            display: none;
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 10px;
+            background: rgba(124, 58, 237, 0.07);
+            border: 1px solid rgba(124, 58, 237, 0.18);
+            color: #ddd6fe;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .avalanche-result.show {
+            display: block;
+        }
+
+        .security-note {
+            max-width: 1100px;
+            margin-top: 25px;
+            padding: 18px 20px;
+            border-radius: 14px;
+            background: rgba(59, 130, 246, 0.06);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            color: #a1a1aa;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 800px) {
+            .hash-page {
+                padding: 30px 5%;
+            }
+
+            .hash-header h1 {
+                font-size: 32px;
+            }
+
+            .result-grid,
+            .comparison-grid,
+            .avalanche-inputs {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+{% include "components/navbar.html" %}
+
+<div class="hash-page">
+
+    <div class="hash-header">
+
+        <a href="{{ url_for('main.home') }}" class="back-link">
+            ← Back to CipherVault
+        </a>
+
+        <h1>Hash Playground</h1>
+
+        <p>
+            Generate cryptographic hashes and explore how small
+            changes in input produce completely different outputs.
+        </p>
+
+        <div class="tag-row">
+            <span class="tag">SHA-256</span>
+            <span class="tag">SHA-512</span>
+            <span class="tag">Avalanche Effect</span>
+            <span class="tag">Hash Analysis</span>
+        </div>
+
+    </div>
+
+
+    <!-- HASH GENERATOR -->
+
+    <div class="hash-card">
+
+        <h2>🔐 Generate Cryptographic Hashes</h2>
+
+        <p class="hash-card-description">
+            Enter text below. CipherVault will generate SHA-256
+            and SHA-512 hashes for the same input.
+        </p>
+
+        <label class="input-label" for="hash-input">
+            Text to Hash
+        </label>
+
+        <textarea
+            id="hash-input"
+            class="hash-input"
+            placeholder="Example: Hello CipherVault"></textarea>
+
+        <button
+            type="button"
+            id="hash-button"
+            class="hash-button">
+            Generate Hashes
+        </button>
+
+
+        <div
+            id="error-box"
+            class="error-box">
+        </div>
+
+
+        <div
+            id="hash-results"
+            class="hash-results">
+
+            <div class="result-grid">
+
+                <div class="result-item">
+
+                    <div class="result-title">
+                        SHA-256
+                    </div>
+
+                    <div
+                        id="sha256-value"
+                        class="hash-value">
+                    </div>
+
+                    <button
+                        type="button"
+                        class="copy-button"
+                        onclick="copyHash('sha256-value')">
+                        Copy SHA-256
+                    </button>
+
+                </div>
+
+
+                <div class="result-item">
+
+                    <div class="result-title">
+                        SHA-512
+                    </div>
+
+                    <div
+                        id="sha512-value"
+                        class="hash-value">
+                    </div>
+
+                    <button
+                        type="button"
+                        class="copy-button"
+                        onclick="copyHash('sha512-value')">
+                        Copy SHA-512
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="stats">
+
+                <div class="stat">
+                    Input length:
+                    <strong id="input-length">0</strong>
+                </div>
+
+                <div class="stat">
+                    SHA-256 length:
+                    <strong id="sha256-length">64</strong>
+                    characters
+                </div>
+
+                <div class="stat">
+                    SHA-512 length:
+                    <strong id="sha512-length">128</strong>
+                    characters
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- AVALANCHE EFFECT -->
+
+    <div class="avalanche-section">
+
+        <h2>⚡ Avalanche Effect Demonstration</h2>
+
+        <p>
+            A good cryptographic hash function produces a significantly
+            different hash when the input changes, even by a single
+            character. This behavior is known as the
+            <strong>avalanche effect</strong>.
+        </p>
+
+
+        <div class="avalanche-inputs">
+
+            <div>
+
+                <label class="input-label" for="input-a">
+                    Input A
+                </label>
+
+                <textarea
+                    id="input-a"
+                    class="hash-input"
+                    style="min-height:90px;"
+                    placeholder="Hello"></textarea>
+
+            </div>
+
+
+            <div>
+
+                <label class="input-label" for="input-b">
+                    Input B
+                </label>
+
+                <textarea
+                    id="input-b"
+                    class="hash-input"
+                    style="min-height:90px;"
+                    placeholder="hello"></textarea>
+
+            </div>
+
+        </div>
+
+
+        <button
+            type="button"
+            id="compare-button"
+            class="compare-button">
+            Compare SHA-256 Hashes
+        </button>
+
+
+        <div
+            id="avalanche-result"
+            class="avalanche-result">
+
+            <div>
+                <strong>Input A Hash:</strong>
+            </div>
+
+            <div
+                id="compare-hash-a"
+                class="comparison-value">
+            </div>
+
+            <br>
+
+            <div>
+                <strong>Input B Hash:</strong>
+            </div>
+
+            <div
+                id="compare-hash-b"
+                class="comparison-value">
+            </div>
+
+            <br>
+
+            <div id="comparison-message"></div>
+
+        </div>
+
+    </div>
+
+
+    <div class="security-note">
+
+        <strong>Security note:</strong>
+        Hashing is a one-way cryptographic operation and is
+        different from encryption. SHA-256 and SHA-512 are
+        cryptographic hash functions, not encryption algorithms.
+        A hash is not intended to be decrypted back into the
+        original input.
+
+    </div>
+
+</div>
+
+
+<script>
+
+const hashInput =
+    document.getElementById("hash-input");
+
+const hashButton =
+    document.getElementById("hash-button");
+
+const hashResults =
+    document.getElementById("hash-results");
+
+const errorBox =
+    document.getElementById("error-box");
+
+
+// ==========================================
+// CSRF TOKEN
+// ==========================================
+
+const csrfToken =
+    document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute("content");
+
+
+async function generateHashes() {
+
+    const text =
+        hashInput.value;
+
+    errorBox.classList.remove("show");
+    errorBox.textContent = "";
+
+    if (!text.trim()) {
+
+        errorBox.textContent =
+            "Please enter some text to hash.";
+
+        errorBox.classList.add("show");
+
+        hashResults.classList.remove("show");
+
+        return;
+    }
+
+
+    hashButton.disabled = true;
+
+    hashButton.textContent =
+        "Generating...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                "{{ url_for('main.api_generate_hashes') }}",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json",
+
+                        "X-CSRFToken":
+                            csrfToken
+                    },
+
+                    body: JSON.stringify({
+                        text: text
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.success) {
+
+            throw new Error(
+                data.error ||
+                "Unable to generate hashes."
+            );
+
+        }
+
+
+        const result =
+            data.result;
+
+
+        document.getElementById(
+            "sha256-value"
+        ).textContent =
+            result.sha256;
+
+
+        document.getElementById(
+            "sha512-value"
+        ).textContent =
+            result.sha512;
+
+
+        document.getElementById(
+            "input-length"
+        ).textContent =
+            result.input_length;
+
+
+        document.getElementById(
+            "sha256-length"
+        ).textContent =
+            result.sha256_length;
+
+
+        document.getElementById(
+            "sha512-length"
+        ).textContent =
+            result.sha512_length;
+
+
+        hashResults.classList.add("show");
+
+    }
+
+    catch (error) {
+
+        errorBox.textContent =
+            error.message;
+
+        errorBox.classList.add("show");
+
+        hashResults.classList.remove("show");
+
+    }
+
+    finally {
+
+        hashButton.disabled = false;
+
+        hashButton.textContent =
+            "Generate Hashes";
+
+    }
+}
+
+
+hashButton.addEventListener(
+    "click",
+    generateHashes
+);
+
+
+async function copyHash(elementId) {
+
+    const value =
+        document.getElementById(
+            elementId
+        ).textContent;
+
+
+    if (!value) {
+        return;
+    }
+
+
+    try {
+
+        await navigator.clipboard.writeText(value);
+
+        alert("Hash copied to clipboard.");
+
+    }
+
+    catch (error) {
+
+        alert("Unable to copy hash.");
+
+    }
+
+}
+
+
+/* Avalanche Effect */
+
+const compareButton =
+    document.getElementById("compare-button");
+
+const avalancheResult =
+    document.getElementById("avalanche-result");
+
+
+async function compareHashes() {
+
+    const inputA =
+        document.getElementById(
+            "input-a"
+        ).value;
+
+    const inputB =
+        document.getElementById(
+            "input-b"
+        ).value;
+
+
+    if (!inputA || !inputB) {
+
+        avalancheResult.textContent =
+            "Please enter both Input A and Input B.";
+
+        avalancheResult.classList.add("show");
+
+        return;
+    }
+
+
+    try {
+
+        const responseA =
+            await fetch(
+                "{{ url_for('main.api_generate_hashes') }}",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json",
+
+                        "X-CSRFToken":
+                            csrfToken
+                    },
+
+                    body: JSON.stringify({
+                        text: inputA
+                    })
+                }
+            );
+
+
+        const responseB =
+            await fetch(
+                "{{ url_for('main.api_generate_hashes') }}",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json",
+
+                        "X-CSRFToken":
+                            csrfToken
+                    },
+
+                    body: JSON.stringify({
+                        text: inputB
+                    })
+                }
+            );
+
+
+        const dataA =
+            await responseA.json();
+
+        const dataB =
+            await responseB.json();
+
+
+        if (!dataA.success || !dataB.success) {
+
+            throw new Error(
+                "Unable to compare the inputs."
+            );
+
+        }
+
+
+        const hashA =
+            dataA.result.sha256;
+
+        const hashB =
+            dataB.result.sha256;
+
+
+        document.getElementById(
+            "compare-hash-a"
+        ).textContent =
+            hashA;
+
+
+        document.getElementById(
+            "compare-hash-b"
+        ).textContent =
+            hashB;
+
+
+        const message =
+            document.getElementById(
+                "comparison-message"
+            );
+
+
+        if (hashA === hashB) {
+
+            message.textContent =
+                "The inputs are identical, so their SHA-256 hashes are identical.";
+
+        }
+
+        else {
+
+            message.textContent =
+                "The hashes are completely different. This demonstrates the avalanche effect: even a small input change can produce a substantially different hash.";
+
+        }
+
+
+        avalancheResult.classList.add("show");
+
+    }
+
+    catch (error) {
+
+        avalancheResult.textContent =
+            error.message;
+
+        avalancheResult.classList.add("show");
+
+    }
+}
+
+
+compareButton.addEventListener(
+    "click",
+    compareHashes
+);
+
+</script>
+
+</body>
+</html>

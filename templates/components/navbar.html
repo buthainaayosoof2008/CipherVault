@@ -1,0 +1,79 @@
+<nav class="cv-navbar">
+
+    <!-- Brand -->
+    <div class="cv-nav-brand">
+
+        <a href="{{ url_for('main.home') }}">
+
+            <span class="cv-brand-icon">⬡</span>
+
+            <span>
+                Cipher<span class="cv-brand-accent">Vault</span>
+            </span>
+
+        </a>
+
+    </div>
+
+
+    <!-- Navigation Links -->
+    <div class="cv-nav-links">
+
+        <a href="{{ url_for('main.home') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('main.secure_message') }}">
+            Crypto Lab
+        </a>
+
+        <a href="{{ url_for('main.weak_crypto') }}">
+            Analysis
+        </a>
+
+        <a href="{{ url_for('main.security_score') }}">
+            Security
+        </a>
+
+        <a href="{{ url_for('main.security_report') }}">
+            Reports
+        </a>
+
+    </div>
+
+
+    <!-- User Section -->
+    <div class="cv-nav-user">
+
+        <div class="cv-user-info">
+
+            <div class="cv-user-avatar">
+                {{ session.get("username", "U")[0]|upper }}
+            </div>
+
+            <div class="cv-user-details">
+
+                <span class="cv-user-label">
+                    Signed in as
+                </span>
+
+                <span class="cv-user-name">
+                    {{ session.get("username", "User") }}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('main.logout') }}"
+            class="cv-logout-btn"
+        >
+            <span>↪</span>
+            Logout
+        </a>
+
+    </div>
+
+</nav>

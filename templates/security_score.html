@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Crypto Security Score | CipherVault</title>
+
+    <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}"
+    >
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .score-page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 70px;
+        }
+
+        .score-header {
+            margin-bottom: 30px;
+        }
+
+        .score-header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .score-header p {
+            color: #a9b1c6;
+            font-size: 16px;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .score-card {
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 18px;
+            padding: 26px;
+        }
+
+        .score-card h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #dce3f5;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #30384d;
+            background: #0b1020;
+            color: white;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #8b5cf6;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 18px 0;
+        }
+
+        .checkbox-row input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .score-button {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            background: #7c3aed;
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .score-button:hover {
+            background: #6d28d9;
+        }
+
+        .score-result {
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 170px;
+            height: 170px;
+            margin: 10px auto 20px;
+            border-radius: 50%;
+            border: 8px solid #7c3aed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #0b1020;
+        }
+
+        .score-number {
+            font-size: 46px;
+            font-weight: 800;
+        }
+
+        .score-label {
+            color: #a9b1c6;
+            font-size: 13px;
+        }
+
+        .rating {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 22px;
+        }
+
+        .findings {
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .finding {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            background: #0b1020;
+            border: 1px solid #252d40;
+            color: #cbd5e1;
+        }
+
+        .note {
+            margin-top: 22px;
+            padding: 14px;
+            border-radius: 10px;
+            background: rgba(124, 58, 237, 0.08);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            color: #aeb8ce;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .status-message {
+            margin-top: 15px;
+            text-align: center;
+            color: #f87171;
+        }
+
+        @media (max-width: 800px) {
+            .score-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+{% include "components/navbar.html" %}
+
+<div class="score-page">
+
+    <div class="score-header">
+
+        <a
+            href="{{ url_for('main.home') }}"
+            style="color:#a78bfa; text-decoration:none;"
+        >
+            ← Back to CipherVault
+        </a>
+
+        <h1>Crypto Security Score</h1>
+
+        <p>
+            Evaluate cryptographic choices using a rule-based security heuristic.
+        </p>
+
+    </div>
+
+
+    <div class="score-grid">
+
+        <!-- INPUT CARD -->
+
+        <div class="score-card">
+
+            <h2>Security Assessment</h2>
+
+            <div class="form-group">
+
+                <label for="algorithm">
+                    Cryptographic Algorithm
+                </label>
+
+                <select id="algorithm">
+
+                    <option value="aes-256-gcm">
+                        AES-256-GCM
+                    </option>
+
+                    <option value="aes-256">
+                        AES-256
+                    </option>
+
+                    <option value="sha-256">
+                        SHA-256
+                    </option>
+
+                    <option value="sha-512">
+                        SHA-512
+                    </option>
+
+                    <option value="md5">
+                        MD5
+                    </option>
+
+                    <option value="sha1">
+                        SHA-1
+                    </option>
+
+                    <option value="des">
+                        DES
+                    </option>
+
+                    <option value="3des">
+                        3DES
+                    </option>
+
+                    <option value="rc4">
+                        RC4
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="keyLength">
+                    Key Length
+                </label>
+
+                <input
+                    type="number"
+                    id="keyLength"
+                    value="256"
+                    min="1"
+                    placeholder="Enter key length"
+                >
+
+            </div>
+
+
+            <div class="checkbox-row">
+
+                <input
+                    type="checkbox"
+                    id="authentication"
+                    checked
+                >
+
+                <label for="authentication">
+                    Authenticated encryption enabled
+                </label>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="score-button"
+                onclick="calculateScore()"
+            >
+                Calculate Security Score
+            </button>
+
+
+            <div
+                id="statusMessage"
+                class="status-message"
+            ></div>
+
+        </div>
+
+
+        <!-- RESULT CARD -->
+
+        <div class="score-card score-result">
+
+            <h2>Security Assessment</h2>
+
+            <div class="score-circle">
+
+                <div
+                    id="scoreNumber"
+                    class="score-number"
+                >
+                    --
+                </div>
+
+                <div class="score-label">
+                    / 100
+                </div>
+
+            </div>
+
+
+            <div
+                id="rating"
+                class="rating"
+            >
+                Awaiting assessment
+            </div>
+
+
+            <div class="findings">
+
+                <h3>
+                    Findings
+                </h3>
+
+                <div id="findingsContainer">
+
+                    <div class="finding">
+                        Select an algorithm and calculate the score.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="note"
+                class="note"
+            >
+                This score is an educational rule-based heuristic and is
+                not an industry security certification.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+async function calculateScore() {
+
+    const algorithm =
+        document.getElementById("algorithm").value;
+
+    const keyLength =
+        document.getElementById("keyLength").value;
+
+    const authentication =
+        document.getElementById("authentication").checked;
+
+    const statusMessage =
+        document.getElementById("statusMessage");
+
+    statusMessage.textContent = "";
+
+
+    try {
+
+        const response = await fetch(
+            "{{ url_for('main.api_security_score') }}",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document
+                        .querySelector('meta[name="csrf-token"]')
+                        .getAttribute("content")
+                },
+
+                body: JSON.stringify({
+                    algorithm: algorithm,
+                    key_length: keyLength,
+                    authentication: authentication
+                })
+            }
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.success) {
+
+            statusMessage.textContent =
+                data.error ||
+                "Unable to calculate score.";
+
+            return;
+        }
+
+
+        const result =
+            data.result;
+
+
+        document.getElementById(
+            "scoreNumber"
+        ).textContent =
+            result.score;
+
+
+        document.getElementById(
+            "rating"
+        ).textContent =
+            result.rating;
+
+
+        const findingsContainer =
+            document.getElementById(
+                "findingsContainer"
+            );
+
+
+        findingsContainer.innerHTML = "";
+
+
+        result.findings.forEach(
+            function(finding) {
+
+                const div =
+                    document.createElement("div");
+
+                div.className =
+                    "finding";
+
+                div.textContent =
+                    finding;
+
+                findingsContainer.appendChild(
+                    div
+                );
+
+            }
+        );
+
+
+        document.getElementById(
+            "note"
+        ).textContent =
+            result.note;
+
+    }
+
+    catch (error) {
+
+        statusMessage.textContent =
+            "Unable to connect to CipherVault.";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

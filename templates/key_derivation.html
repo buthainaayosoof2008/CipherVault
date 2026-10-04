@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Password to Key | CipherVault</title>
+
+    <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}"
+    >
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .key-page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 70px;
+        }
+
+        .key-header {
+            margin-bottom: 30px;
+        }
+
+        .key-header h1 {
+            font-size: 36px;
+            margin: 20px 0 10px;
+        }
+
+        .key-header p {
+            color: #a9b1c6;
+            line-height: 1.6;
+        }
+
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .flow-step {
+            text-align: center;
+            padding: 18px 10px;
+            border-radius: 14px;
+            background: #111827;
+            border: 1px solid rgba(139, 92, 246, 0.25);
+        }
+
+        .flow-step strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .flow-step span {
+            color: #929bb0;
+            font-size: 12px;
+        }
+
+        .arrow {
+            text-align: center;
+            color: #8b5cf6;
+            font-size: 22px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 18px;
+            padding: 26px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+        }
+
+        .card p {
+            color: #9da7bb;
+            line-height: 1.6;
+        }
+
+        .input-label {
+            display: block;
+            margin: 22px 0 8px;
+            font-weight: 600;
+        }
+
+        .password-box {
+            display: flex;
+            gap: 8px;
+        }
+
+        .password-box input {
+            flex: 1;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 13px 14px;
+            border-radius: 10px;
+            border: 1px solid #30384d;
+            background: #0b1020;
+            color: white;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #8b5cf6;
+        }
+
+        .toggle-button {
+            padding: 0 15px;
+            border: 1px solid #30384d;
+            border-radius: 10px;
+            background: #151c2d;
+            color: #cbd5e1;
+            cursor: pointer;
+        }
+
+        .derive-button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            background: #7c3aed;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .derive-button:hover {
+            background: #6d28d9;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 14px 0;
+            border-bottom: 1px solid #252d40;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: #929bb0;
+        }
+
+        .result-value {
+            text-align: right;
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .security-note {
+            margin-top: 24px;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(124, 58, 237, 0.08);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            color: #b5bfd2;
+            line-height: 1.6;
+            font-size: 13px;
+        }
+
+        .status {
+            margin-top: 15px;
+            color: #f87171;
+            text-align: center;
+        }
+
+        @media (max-width: 850px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flow {
+                grid-template-columns: 1fr;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+{% include "components/navbar.html" %}
+
+<div class="key-page">
+
+    <div class="key-header">
+
+        <a
+            href="{{ url_for('main.home') }}"
+            style="color:#a78bfa; text-decoration:none;"
+        >
+            ← Back to CipherVault
+        </a>
+
+        <h1>Password → Cryptographic Key</h1>
+
+        <p>
+            Understand how a password is transformed into a cryptographic
+            key before it is used for encryption.
+        </p>
+
+    </div>
+
+
+    <!-- PROCESS FLOW -->
+
+    <div class="flow">
+
+        <div class="flow-step">
+            <strong>Password</strong>
+            <span>User-provided secret</span>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-step">
+            <strong>Salt</strong>
+            <span>Random value</span>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-step">
+            <strong>PBKDF2</strong>
+            <span>Key derivation</span>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-step">
+            <strong>256-bit Key</strong>
+            <span>Derived key</span>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-step">
+            <strong>AES-256-GCM</strong>
+            <span>Encryption</span>
+        </div>
+
+    </div>
+
+
+    <div class="main-grid">
+
+        <!-- INPUT -->
+
+        <div class="card">
+
+            <h2>Key Derivation Demo</h2>
+
+            <p>
+                Enter a sample password to see the cryptographic
+                derivation process.
+            </p>
+
+            <label
+                class="input-label"
+                for="password"
+            >
+                Password
+            </label>
+
+            <div class="password-box">
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Enter a sample password"
+                    autocomplete="off"
+                >
+
+                <button
+                    type="button"
+                    class="toggle-button"
+                    onclick="togglePassword()"
+                >
+                    Show
+                </button>
+
+            </div>
+
+            <button
+                type="button"
+                class="derive-button"
+                onclick="deriveKey()"
+            >
+                Demonstrate Key Derivation
+            </button>
+
+            <div
+                id="status"
+                class="status"
+            ></div>
+
+        </div>
+
+
+        <!-- RESULT -->
+
+        <div class="card">
+
+            <h2>Derivation Details</h2>
+
+            <div class="result-row">
+
+                <span class="result-label">
+                    Password Length
+                </span>
+
+                <span
+                    class="result-value"
+                    id="passwordLength"
+                >
+                    —
+                </span>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <span class="result-label">
+                    Salt Length
+                </span>
+
+                <span
+                    class="result-value"
+                    id="saltLength"
+                >
+                    —
+                </span>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <span class="result-label">
+                    Key Derivation Function
+                </span>
+
+                <span
+                    class="result-value"
+                    id="kdf"
+                >
+                    —
+                </span>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <span class="result-label">
+                    Iterations
+                </span>
+
+                <span
+                    class="result-value"
+                    id="iterations"
+                >
+                    —
+                </span>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <span class="result-label">
+                    Derived Key Size
+                </span>
+
+                <span
+                    class="result-value"
+                    id="keyLength"
+                >
+                    —
+                </span>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <span class="result-label">
+                    Encryption Algorithm
+                </span>
+
+                <span
+                    class="result-value"
+                    id="algorithm"
+                >
+                    —
+                </span>
+
+            </div>
+
+
+            <div class="security-note">
+
+                <strong>Security note:</strong><br>
+
+                CipherVault never displays the complete derived key.
+                Only a small preview is shown for educational purposes.
+                A fresh random salt is generated for every demonstration.
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function togglePassword() {
+
+    const password =
+        document.getElementById("password");
+
+    const button =
+        document.querySelector(".toggle-button");
+
+
+    if (password.type === "password") {
+
+        password.type = "text";
+        button.textContent = "Hide";
+
+    } else {
+
+        password.type = "password";
+        button.textContent = "Show";
+
+    }
+
+}
+
+
+async function deriveKey() {
+
+    const password =
+        document.getElementById("password").value;
+
+    const status =
+        document.getElementById("status");
+
+    status.textContent = "";
+
+
+    if (!password) {
+
+        status.textContent =
+            "Please enter a password.";
+
+        return;
+    }
+
+
+    try {
+
+        const response = await fetch(
+            "{{ url_for('main.api_key_derivation') }}",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document
+                        .querySelector('meta[name="csrf-token"]')
+                        .getAttribute("content")
+                },
+
+                body: JSON.stringify({
+                    password: password
+                })
+            }
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.success) {
+
+            status.textContent =
+                data.error ||
+                "Unable to perform key derivation.";
+
+            return;
+        }
+
+
+        const result =
+            data.result;
+
+
+        document.getElementById(
+            "passwordLength"
+        ).textContent =
+            result.password_length +
+            " characters";
+
+
+        document.getElementById(
+            "saltLength"
+        ).textContent =
+            result.salt_length +
+            " bytes";
+
+
+        document.getElementById(
+            "kdf"
+        ).textContent =
+            result.kdf;
+
+
+        document.getElementById(
+            "iterations"
+        ).textContent =
+            result.iterations.toLocaleString();
+
+
+        document.getElementById(
+            "keyLength"
+        ).textContent =
+            result.key_length +
+            " bits";
+
+
+        document.getElementById(
+            "algorithm"
+        ).textContent =
+            result.algorithm;
+
+    }
+
+    catch (error) {
+
+        status.textContent =
+            "Unable to connect to CipherVault.";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

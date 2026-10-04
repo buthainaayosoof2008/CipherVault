@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | CipherVault</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-family: Arial, sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at top,
+                    #1b1430 0%,
+                    #0b0b12 45%,
+                    #060609 100%
+                );
+
+            color: #f4f4f5;
+        }
+
+        .login-wrapper {
+
+            width: 100%;
+
+            max-width: 430px;
+
+            padding: 24px;
+        }
+
+        .login-card {
+
+            padding: 38px;
+
+            background: rgba(18, 18, 30, 0.92);
+
+            border: 1px solid rgba(139, 92, 246, 0.25);
+
+            border-radius: 20px;
+
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.45),
+                0 0 35px rgba(139, 92, 246, 0.08);
+        }
+
+        .logo {
+
+            text-align: center;
+
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+
+            font-size: 42px;
+
+            color: #a78bfa;
+
+            margin-bottom: 8px;
+        }
+
+        .logo h1 {
+
+            margin: 0;
+
+            font-size: 30px;
+        }
+
+        .logo h1 span {
+
+            color: #a78bfa;
+        }
+
+        .logo p {
+
+            margin-top: 9px;
+
+            color: #71717a;
+
+            font-size: 13px;
+        }
+
+        .security-status {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+
+            padding: 11px 13px;
+
+            margin-bottom: 24px;
+
+            border-radius: 9px;
+
+            background: rgba(34, 197, 94, 0.06);
+
+            border: 1px solid rgba(34, 197, 94, 0.15);
+
+            color: #a1a1aa;
+
+            font-size: 12px;
+        }
+
+        .status-dot {
+
+            width: 8px;
+
+            height: 8px;
+
+            border-radius: 50%;
+
+            background: #22c55e;
+
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
+        }
+
+        .message {
+
+            padding: 11px 13px;
+
+            margin-bottom: 18px;
+
+            border-radius: 9px;
+
+            font-size: 13px;
+        }
+
+        .error-message {
+
+            background: rgba(239, 68, 68, 0.08);
+
+            border: 1px solid rgba(239, 68, 68, 0.18);
+
+            color: #fca5a5;
+        }
+
+        .success-message {
+
+            background: rgba(34, 197, 94, 0.08);
+
+            border: 1px solid rgba(34, 197, 94, 0.18);
+
+            color: #86efac;
+        }
+
+        .form-group {
+
+            margin-bottom: 19px;
+        }
+
+        label {
+
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #d4d4d8;
+
+            font-size: 13px;
+
+            font-weight: 600;
+        }
+
+        input {
+
+            width: 100%;
+
+            padding: 13px 14px;
+
+            border: 1px solid #27272a;
+
+            border-radius: 10px;
+
+            background: #0d0d14;
+
+            color: #f4f4f5;
+
+            outline: none;
+
+            font-size: 14px;
+
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        input:focus {
+
+            border-color: #8b5cf6;
+
+            box-shadow:
+                0 0 0 3px rgba(139, 92, 246, 0.10);
+        }
+
+        .password-wrapper {
+
+            position: relative;
+        }
+
+        .password-wrapper input {
+
+            padding-right: 65px;
+        }
+
+        .show-password {
+
+            position: absolute;
+
+            right: 12px;
+
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            border: none;
+
+            background: transparent;
+
+            color: #8b8b96;
+
+            cursor: pointer;
+
+            font-size: 12px;
+        }
+
+        .show-password:hover {
+
+            color: #c4b5fd;
+        }
+
+        .login-button {
+
+            width: 100%;
+
+            padding: 13px;
+
+            margin-top: 8px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: #7c3aed;
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .login-button:hover {
+
+            background: #8b5cf6;
+
+            transform: translateY(-1px);
+        }
+
+        .register-link {
+
+            text-align: center;
+
+            margin-top: 22px;
+
+            color: #71717a;
+
+            font-size: 13px;
+        }
+
+        .register-link a {
+
+            color: #a78bfa;
+
+            text-decoration: none;
+
+            font-weight: 600;
+        }
+
+        .register-link a:hover {
+
+            color: #c4b5fd;
+        }
+
+        .footer {
+
+            text-align: center;
+
+            margin-top: 25px;
+
+            color: #52525b;
+
+            font-size: 11px;
+
+            line-height: 1.6;
+        }
+
+        @media (max-width: 500px) {
+
+            .login-card {
+
+                padding: 28px 22px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="login-wrapper">
+
+    <div class="login-card">
+
+        <!-- LOGO -->
+
+        <div class="logo">
+
+            <div class="logo-icon">⬡</div>
+
+            <h1>
+                Cipher<span>Vault</span>
+            </h1>
+
+            <p>
+                Cryptography Security Lab
+            </p>
+
+        </div>
+
+
+        <!-- SECURITY STATUS -->
+
+        <div class="security-status">
+
+            <span class="status-dot"></span>
+
+            Secure laboratory environment
+
+        </div>
+
+
+        <!-- ERROR MESSAGE -->
+
+        {% if error %}
+
+        <div class="message error-message">
+
+            {{ error }}
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- REGISTRATION SUCCESS -->
+
+        {% if request.args.get("registered") == "true" %}
+
+        <div class="message success-message">
+
+            Account created successfully. You can now sign in.
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- LOGIN FORM -->
+
+        <form method="POST"
+              action="{{ url_for('main.login') }}">
+
+            <!-- CSRF PROTECTION -->
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+
+            <div class="form-group">
+
+                <label for="username">
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Enter username"
+                    autocomplete="username"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <div class="password-wrapper">
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        onclick="togglePassword()">
+
+                        Show
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-button">
+
+                Sign In
+
+            </button>
+
+        </form>
+
+
+        <!-- CREATE ACCOUNT -->
+
+        <div class="register-link">
+
+            Don't have an account?
+
+            <a href="{{ url_for('main.register') }}">
+
+                Create Account
+
+            </a>
+
+        </div>
+
+
+        <!-- FOOTER -->
+
+        <div class="footer">
+
+            CipherVault<br>
+
+            Understand. Test. Secure.
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function togglePassword() {
+
+    const password =
+        document.getElementById("password");
+
+    const button =
+        document.querySelector(".show-password");
+
+    if (password.type === "password") {
+
+        password.type = "text";
+
+        button.textContent = "Hide";
+
+    } else {
+
+        password.type = "password";
+
+        button.textContent = "Show";
+
+    }
+
+}
+
+</script>
+
+</body>
+
+</html>

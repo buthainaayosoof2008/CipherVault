@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Entropy Visualizer | CipherVault</title>
+
+    <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}"
+    >
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .entropy-page {
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 40px 24px 70px;
+        }
+
+        .entropy-header {
+            margin-bottom: 30px;
+        }
+
+        .entropy-header h1 {
+            font-size: 36px;
+            margin: 20px 0 10px;
+        }
+
+        .entropy-header p {
+            color: #a9b1c6;
+            line-height: 1.6;
+        }
+
+        .entropy-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 18px;
+            padding: 26px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+        }
+
+        .card p {
+            color: #9da7bb;
+            line-height: 1.6;
+        }
+
+        label {
+            display: block;
+            margin: 22px 0 8px;
+            font-weight: 600;
+        }
+
+        .password-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        input {
+            flex: 1;
+            min-width: 0;
+            box-sizing: border-box;
+            padding: 13px 14px;
+            border-radius: 10px;
+            border: 1px solid #30384d;
+            background: #0b1020;
+            color: white;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #8b5cf6;
+        }
+
+        .toggle {
+            padding: 0 15px;
+            border-radius: 10px;
+            border: 1px solid #30384d;
+            background: #151c2d;
+            color: #cbd5e1;
+            cursor: pointer;
+        }
+
+        .analyze-button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            background: #7c3aed;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .analyze-button:hover {
+            background: #6d28d9;
+        }
+
+        .entropy-display {
+            text-align: center;
+            margin: 20px 0 30px;
+        }
+
+        .entropy-number {
+            font-size: 54px;
+            font-weight: 800;
+        }
+
+        .entropy-unit {
+            color: #9da7bb;
+            font-size: 14px;
+        }
+
+        .bar-container {
+            height: 14px;
+            background: #0b1020;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 1px solid #252d40;
+        }
+
+        .bar {
+            height: 100%;
+            width: 0%;
+            background: #7c3aed;
+            transition: width 0.5s ease;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 14px 0;
+            border-bottom: 1px solid #252d40;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: #929bb0;
+        }
+
+        .result-value {
+            text-align: right;
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .category {
+            padding: 7px 10px;
+            border-radius: 20px;
+            background: rgba(124, 58, 237, 0.12);
+            border: 1px solid rgba(124, 58, 237, 0.25);
+            color: #c4b5fd;
+            font-size: 12px;
+        }
+
+        .note {
+            margin-top: 24px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(124, 58, 237, 0.08);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            color: #aeb8ce;
+            line-height: 1.6;
+            font-size: 13px;
+        }
+
+        .status {
+            margin-top: 15px;
+            text-align: center;
+            color: #f87171;
+        }
+
+        @media (max-width: 800px) {
+            .entropy-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+{% include "components/navbar.html" %}
+
+<div class="entropy-page">
+
+    <div class="entropy-header">
+
+        <a
+            href="{{ url_for('main.home') }}"
+            style="color:#a78bfa; text-decoration:none;"
+        >
+            ← Back to CipherVault
+        </a>
+
+        <h1>Entropy Visualizer</h1>
+
+        <p>
+            Explore how password length and character variety affect
+            theoretical password entropy.
+        </p>
+
+    </div>
+
+
+    <div class="entropy-grid">
+
+        <!-- INPUT -->
+
+        <div class="card">
+
+            <h2>Password Analysis</h2>
+
+            <p>
+                Enter a sample password to calculate its theoretical
+                entropy.
+            </p>
+
+            <label for="password">
+                Sample Password
+            </label>
+
+            <div class="password-row">
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Enter a sample password"
+                    autocomplete="off"
+                >
+
+                <button
+                    type="button"
+                    class="toggle"
+                    onclick="togglePassword()"
+                >
+                    Show
+                </button>
+
+            </div>
+
+            <button
+                type="button"
+                class="analyze-button"
+                onclick="analyzeEntropy()"
+            >
+                Analyze Entropy
+            </button>
+
+            <div
+                id="status"
+                class="status"
+            ></div>
+
+            <div class="note">
+
+                <strong>Privacy:</strong>
+                Use a sample password for this demonstration.
+                Do not enter a real password.
+
+            </div>
+
+        </div>
+
+
+        <!-- RESULT -->
+
+        <div class="card">
+
+            <h2>Entropy Result</h2>
+
+            <div class="entropy-display">
+
+                <div
+                    id="entropy"
+                    class="entropy-number"
+                >
+                    —
+                </div>
+
+                <div class="entropy-unit">
+                    bits of theoretical entropy
+                </div>
+
+            </div>
+
+
+            <div class="bar-container">
+
+                <div
+                    id="entropyBar"
+                    class="bar"
+                >
+                </div>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <span class="result-label">
+                    Password Length
+                </span>
+
+                <span
+                    id="length"
+                    class="result-value"
+                >
+                    —
+                </span>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <span class="result-label">
+                    Character Set Size
+                </span>
+
+                <span
+                    id="charset"
+                    class="result-value"
+                >
+                    —
+                </span>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <span class="result-label">
+                    Character Categories
+                </span>
+
+                <span
+                    id="categories"
+                    class="result-value"
+                >
+                    —
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function togglePassword() {
+
+    const password =
+        document.getElementById("password");
+
+    const button =
+        document.querySelector(".toggle");
+
+
+    if (password.type === "password") {
+
+        password.type = "text";
+        button.textContent = "Hide";
+
+    } else {
+
+        password.type = "password";
+        button.textContent = "Show";
+
+    }
+
+}
+
+
+async function analyzeEntropy() {
+
+    const password =
+        document.getElementById("password").value;
+
+    const status =
+        document.getElementById("status");
+
+    status.textContent = "";
+
+
+    if (!password) {
+
+        status.textContent =
+            "Please enter a sample password.";
+
+        return;
+    }
+
+
+    try {
+
+        const response = await fetch(
+            "{{ url_for('main.api_password_entropy') }}",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document
+                        .querySelector('meta[name="csrf-token"]')
+                        .getAttribute("content")
+                },
+
+                body: JSON.stringify({
+                    password: password
+                })
+            }
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.success) {
+
+            status.textContent =
+                data.error ||
+                "Unable to calculate entropy.";
+
+            return;
+        }
+
+
+        const result =
+            data.result;
+
+
+        document.getElementById(
+            "entropy"
+        ).textContent =
+            result.entropy;
+
+
+        document.getElementById(
+            "length"
+        ).textContent =
+            result.length +
+            " characters";
+
+
+        document.getElementById(
+            "charset"
+        ).textContent =
+            result.charset_size;
+
+
+        document.getElementById(
+            "categories"
+        ).textContent =
+            result.categories.join(", ");
+
+
+        /*
+         * The bar is only a visual representation.
+         * It is intentionally capped at 128 bits.
+         */
+
+        const percentage =
+            Math.min(
+                (result.entropy / 128) * 100,
+                100
+            );
+
+
+        document.getElementById(
+            "entropyBar"
+        ).style.width =
+            percentage + "%";
+
+    }
+
+    catch (error) {
+
+        status.textContent =
+            "Unable to connect to CipherVault.";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

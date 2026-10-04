@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Hash Collision Lab | CipherVault</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- CSRF Token -->
+    <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}"
+    >
+
+    <style>
+        .collision-page {
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 40px 24px 70px;
+        }
+
+        .collision-header {
+            margin-bottom: 30px;
+        }
+
+        .collision-header h1 {
+            font-size: 36px;
+            margin: 20px 0 10px;
+        }
+
+        .collision-header p {
+            color: #a9b1c6;
+            line-height: 1.6;
+        }
+
+        .lab-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 18px;
+            padding: 26px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+        }
+
+        .card p {
+            color: #9da7bb;
+            line-height: 1.6;
+        }
+
+        label {
+            display: block;
+            margin: 22px 0 8px;
+            font-weight: 600;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 130px;
+            box-sizing: border-box;
+            resize: vertical;
+            padding: 13px 14px;
+            border-radius: 10px;
+            border: 1px solid #30384d;
+            background: #0b1020;
+            color: white;
+            outline: none;
+            font-family: inherit;
+        }
+
+        textarea:focus {
+            border-color: #8b5cf6;
+        }
+
+        .collision-button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            background: #7c3aed;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .collision-button:hover {
+            background: #6d28d9;
+        }
+
+        .result-box {
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 12px;
+            background: #0b1020;
+            border: 1px solid #252d40;
+        }
+
+        .result-title {
+            color: #929bb0;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .result-value {
+            font-family: monospace;
+            word-break: break-all;
+            color: #e2e8f0;
+        }
+
+        .collision-found {
+            padding: 15px;
+            margin-bottom: 18px;
+            border-radius: 10px;
+            background: rgba(124, 58, 237, 0.12);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            color: #c4b5fd;
+            font-weight: 700;
+        }
+
+        .warning {
+            margin-top: 24px;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(234, 179, 8, 0.08);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+            color: #cbd5e1;
+            line-height: 1.6;
+            font-size: 13px;
+        }
+
+        .status {
+            margin-top: 15px;
+            text-align: center;
+            color: #f87171;
+        }
+
+        @media (max-width: 800px) {
+            .lab-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+{% include "components/navbar.html" %}
+
+<div class="collision-page">
+
+    <div class="collision-header">
+
+        <a
+            href="{{ url_for('main.home') }}"
+            style="color:#a78bfa; text-decoration:none;"
+        >
+            ← Back to CipherVault
+        </a>
+
+        <h1>Hash Collision Lab</h1>
+
+        <p>
+            Explore how two different inputs can produce the same output
+            when a hash function has a very small output space.
+        </p>
+
+    </div>
+
+
+    <div class="lab-grid">
+
+        <!-- INPUT -->
+
+        <div class="card">
+
+            <h2>Collision Demonstration</h2>
+
+            <p>
+                Enter a sample message. CipherVault will use an intentionally
+                weak toy hash to demonstrate a collision.
+            </p>
+
+            <label for="text">
+                Sample Input
+            </label>
+
+            <textarea
+                id="text"
+                placeholder="Enter a sample message..."
+            ></textarea>
+
+            <button
+                type="button"
+                class="collision-button"
+                onclick="findCollision()"
+            >
+                Find Toy Hash Collision
+            </button>
+
+            <div
+                id="status"
+                class="status"
+            ></div>
+
+            <div class="warning">
+
+                <strong>Educational demonstration only.</strong><br><br>
+
+                This lab does NOT break SHA-256, SHA-512, or other
+                modern cryptographic hash functions.
+
+                The toy hash intentionally has only 256 possible outputs,
+                making collisions easy to demonstrate.
+
+            </div>
+
+        </div>
+
+
+        <!-- RESULT -->
+
+        <div class="card">
+
+            <h2>Collision Result</h2>
+
+            <div id="resultContainer">
+
+                <div class="result-box">
+
+                    <div class="result-title">
+                        Status
+                    </div>
+
+                    <div class="result-value">
+                        Waiting for demonstration...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+async function findCollision() {
+
+    const text =
+        document.getElementById("text").value;
+
+    const status =
+        document.getElementById("status");
+
+    const container =
+        document.getElementById("resultContainer");
+
+    status.textContent = "";
+
+
+    if (!text.trim()) {
+
+        status.textContent =
+            "Please enter a sample message.";
+
+        return;
+    }
+
+
+    try {
+
+        const response = await fetch(
+            "{{ url_for('main.api_hash_collision') }}",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document
+                        .querySelector('meta[name="csrf-token"]')
+                        .getAttribute("content")
+                },
+
+                body: JSON.stringify({
+                    text: text
+                })
+            }
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.success) {
+
+            status.textContent =
+                data.error ||
+                "Unable to run collision demonstration.";
+
+            return;
+        }
+
+
+        const result =
+            data.result;
+
+
+        if (!result.found) {
+
+            container.innerHTML = `
+                <div class="result-box">
+
+                    <div class="result-title">
+                        Result
+                    </div>
+
+                    <div class="result-value">
+                        No collision found within the demonstration range.
+                    </div>
+
+                </div>
+            `;
+
+            return;
+        }
+
+
+        container.innerHTML = `
+
+            <div class="collision-found">
+                ✓ Toy hash collision found
+            </div>
+
+            <div class="result-box">
+
+                <div class="result-title">
+                    Original Input
+                </div>
+
+                <div class="result-value">
+                    ${escapeHtml(result.original)}
+                </div>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <div class="result-title">
+                    Original Hash
+                </div>
+
+                <div class="result-value">
+                    ${escapeHtml(result.original_hash)}
+                </div>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <div class="result-title">
+                    Different Input
+                </div>
+
+                <div class="result-value">
+                    ${escapeHtml(result.collision)}
+                </div>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <div class="result-title">
+                    Same Hash
+                </div>
+
+                <div class="result-value">
+                    ${escapeHtml(result.collision_hash)}
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+    catch (error) {
+
+        status.textContent =
+            "Unable to connect to CipherVault.";
+
+    }
+
+}
+
+
+function escapeHtml(value) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent = value;
+
+    return div.innerHTML;
+}
+
+</script>
+
+</body>
+</html>

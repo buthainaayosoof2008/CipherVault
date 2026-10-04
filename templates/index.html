@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CipherVault | Cryptography Security Lab</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 55px 20px 40px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border: 1px solid rgba(139, 92, 246, 0.5);
+            border-radius: 999px;
+            color: #c4b5fd;
+            background: rgba(139, 92, 246, 0.08);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: 52px;
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 span {
+            color: #a78bfa;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin: 18px auto 0;
+            color: #a1a1aa;
+            font-size: 17px;
+            line-height: 1.7;
+        }
+
+        .status-card {
+            margin: 25px auto 45px;
+            max-width: 850px;
+            padding: 20px 24px;
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 16px;
+            background: rgba(20, 20, 35, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .status-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.7);
+        }
+
+        .status-title {
+            font-weight: 600;
+        }
+
+        .status-subtitle {
+            color: #71717a;
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        .status-tech {
+            color: #c4b5fd;
+            font-size: 13px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .section-title h2 {
+            margin-bottom: 8px;
+        }
+
+        .section-title p {
+            color: #71717a;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .module-card {
+            position: relative;
+            padding: 26px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            background: rgba(18, 18, 30, 0.82);
+            transition:
+                transform 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .module-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        .module-number {
+            position: absolute;
+            top: 18px;
+            right: 20px;
+            color: #52525b;
+            font-size: 12px;
+        }
+
+        .module-icon {
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(139, 92, 246, 0.12);
+            color: #c4b5fd;
+            font-size: 21px;
+            margin-bottom: 18px;
+        }
+
+        .module-card h3 {
+            margin: 0 0 9px;
+            font-size: 18px;
+        }
+
+        .module-card p {
+            color: #8b8b96;
+            font-size: 14px;
+            line-height: 1.6;
+            min-height: 66px;
+        }
+
+        .module-link {
+            display: inline-block;
+            margin-top: 12px;
+            color: #a78bfa;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .module-link:hover {
+            color: #c4b5fd;
+        }
+
+        .tech-section {
+            margin-top: 55px;
+            padding: 30px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            background: rgba(15, 15, 25, 0.7);
+            text-align: center;
+        }
+
+        .tech-tags {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .tech-tag {
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(139, 92, 246, 0.09);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            color: #c4b5fd;
+            font-size: 13px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 45px 20px 25px;
+            color: #52525b;
+            font-size: 13px;
+        }
+
+        @media (max-width: 900px) {
+            .module-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .hero h1 {
+                font-size: 42px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .module-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .status-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     NAVBAR
+     ========================================================= -->
+
+{% include "components/navbar.html" %}
+
+
+<!-- =========================================================
+     DASHBOARD
+     ========================================================= -->
+
+<div class="dashboard-container">
+
+    <!-- HERO -->
+    <section class="hero">
+
+        <div class="hero-badge">
+            🔐 CRYPTOGRAPHY SECURITY LAB
+        </div>
+
+        <h1>
+            Cipher<span>Vault</span>
+        </h1>
+
+        <p>
+            Understand, test, and explore modern cryptographic security
+            through practical encryption, hashing, cryptanalysis,
+            key derivation, and security analysis tools.
+        </p>
+
+    </section>
+
+
+    <!-- SYSTEM STATUS -->
+    <div class="status-card">
+
+        <div class="status-left">
+
+            <div class="status-dot"></div>
+
+            <div>
+                <div class="status-title">
+                    Security Lab Operational
+                </div>
+
+                <div class="status-subtitle">
+                    Cryptographic analysis environment ready
+                </div>
+            </div>
+
+        </div>
+
+        <div class="status-tech">
+            AES-256-GCM · PBKDF2 · SHA-256
+        </div>
+
+    </div>
+
+
+    <!-- MODULES -->
+    <section>
+
+        <div class="section-title">
+
+            <h2>
+                Security Modules
+            </h2>
+
+            <p>
+                Explore the cryptography tools available in CipherVault.
+            </p>
+
+        </div>
+
+
+        <div class="module-grid">
+
+
+            <!-- 01 -->
+            <div class="module-card">
+
+                <div class="module-number">
+                    01
+                </div>
+
+                <div class="module-icon">
+                    🔐
+                </div>
+
+                <h3>
+                    Secure Messaging
+                </h3>
+
+                <p>
+                    Encrypt and decrypt messages using AES-256-GCM
+                    authenticated encryption.
+                </p>
+
+                <a href="{{ url_for('main.secure_message') }}"
+                   class="module-link">
+
+                    Open Lab →
+
+                </a>
+
+            </div>
+
+
+            <!-- 02 -->
+            <div class="module-card">
+
+                <div class="module-number">
+                    02
+                </div>
+
+                <div class="module-icon">
+                    ⚠️
+                </div>
+
+                <h3>
+                    Weak Crypto Detector
+                </h3>
+
+                <p>
+                    Identify weak or outdated algorithms such as MD5,
+                    SHA-1, DES, 3DES, and RC4.
+                </p>
+
+                <a href="{{ url_for('main.weak_crypto') }}"
+                   class="module-link">
+
+                    Analyze Algorithm →
+
+                </a>
+
+            </div>
+
+
+            <!-- 03 -->
+            <div class="module-card">
+
+                <div class="module-number">
+                    03
+                </div>
+
+                <div class="module-icon">
+                    #️⃣
+                </div>
+
+                <h3>
+                    Hash Playground
+                </h3>
+
+                <p>
+                    Generate SHA-256 and SHA-512 hashes and observe
+                    how small input changes affect hash output.
+                </p>
+
+                <a href="{{ url_for('main.hash_playground') }}"
+                   class="module-link">
+
+                    Open Playground →
+
+                </a>
+
+            </div>
+
+
+            <!-- 04 -->
+            <div class="module-card">
+
+                <div class="module-number">
+                    04
+                </div>
+
+                <div class="module-icon">
+                    🔎
+                </div>
+
+                <h3>
+                    Cryptanalysis Lab
+                </h3>
+
+                <p>
+                    Explore Caesar cipher brute-force analysis and
+                    understand how classical ciphers can be attacked.
+                </p>
+
+                <a href="{{ url_for('main.attack_simulator') }}"
+                   class="module-link">
+
+                    Start Analysis →
+
+                </a>
+
+            </div>
+
+
+            <!-- 05 -->
+            <div class="module-card">
+
+                <div class="module-number">
+                    05
+                </div>
+
+                <div class="module-icon">
+                    🛡️
+                </div>
+
+                <h3>
+                    Security Score
+                </h3>
+
+                <p>
+                    Evaluate a cryptographic configuration using an
+                    educational rule-based security scoring system.
+                </p>
+
+                <a href="{{ url_for('main.security_score') }}"
+                   class="module-link">
+
+                    Calculate Score →
+
+                </a>
+
+            </div>
+
+
+            <!-- 06 -->
+            <div class="module-card">
+
+                <div class="module-number">
+                    06
+                </div>
+
+                <div class="module-icon">
+                    🔑
+                </div>
+
+                <h3>
+                    Password → Key
+                </h3>
+
+                <p>
+                    Demonstrate password-based key derivation using
+                    salt and PBKDF2-HMAC-SHA256.
+                </p>
+
+                <a href="{{ url_for('main.key_derivation') }}"
+                   class="module-link">
+
+                    Explore KDF →
+
+                </a>
+
+            </div>
+
+
+            <!-- 07 -->
+            <div class="module-card">
+
+                <div class="module-number">
+                    07
+                </div>
+
+                <div class="module-icon">
+                    📊
+                </div>
+
+                <h3>
+                    Entropy Lab
+                </h3>
+
+                <p>
+                    Calculate theoretical password entropy and visualize
+                    character-set based entropy.
+                </p>
+
+                <a href="{{ url_for('main.entropy') }}"
+                   class="module-link">
+
+                    Analyze Entropy →
+
+                </a>
+
+            </div>
+
+
+            <!-- 08 -->
+            <div class="module-card">
+
+                <div class="module-number">
+                    08
+                </div>
+
+                <div class="module-icon">
+                    🧪
+                </div>
+
+                <h3>
+                    Collision Lab
+                </h3>
+
+                <p>
+                    Demonstrate how collisions can occur in an intentionally
+                    weak educational toy hash function.
+                </p>
+
+                <a href="{{ url_for('main.hash_collision') }}"
+                   class="module-link">
+
+                    Run Demo →
+
+                </a>
+
+            </div>
+
+
+            <!-- 09 -->
+            <div class="module-card">
+
+                <div class="module-number">
+                    09
+                </div>
+
+                <div class="module-icon">
+                    📄
+                </div>
+
+                <h3>
+                    Security Report
+                </h3>
+
+                <p>
+                    Generate a structured cryptographic security report
+                    containing findings and configuration details.
+                </p>
+
+                <a href="{{ url_for('main.security_report') }}"
+                   class="module-link">
+
+                    Generate Report →
+
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- TECHNOLOGY -->
+    <section class="tech-section">
+
+        <h2>
+            Cryptographic Technologies
+        </h2>
+
+        <p>
+            Practical demonstrations built around modern cryptographic
+            concepts and security principles.
+        </p>
+
+        <div class="tech-tags">
+
+            <span class="tech-tag">
+                AES-256-GCM
+            </span>
+
+            <span class="tech-tag">
+                PBKDF2-HMAC-SHA256
+            </span>
+
+            <span class="tech-tag">
+                SHA-256
+            </span>
+
+            <span class="tech-tag">
+                SHA-512
+            </span>
+
+            <span class="tech-tag">
+                Salt
+            </span>
+
+            <span class="tech-tag">
+                Nonce
+            </span>
+
+            <span class="tech-tag">
+                Key Derivation
+            </span>
+
+            <span class="tech-tag">
+                Cryptanalysis
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer class="footer">
+
+        CipherVault — Cryptography Security Lab
+        <br>
+
+        <span>
+            Understand. Test. Secure.
+        </span>
+
+    </footer>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Weak Crypto Detector | CipherVault</title>
+
+    <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <style>
+
+        .detector-page {
+            min-height: 100vh;
+            padding: 40px 7%;
+        }
+
+        .detector-header {
+            max-width: 850px;
+            margin-bottom: 35px;
+        }
+
+        .back-link {
+            color: #a78bfa;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: #c4b5fd;
+        }
+
+        .detector-header h1 {
+            font-size: 42px;
+            margin: 20px 0 12px;
+        }
+
+        .detector-header p {
+            color: #a1a1aa;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .tag-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .tag {
+            padding: 7px 13px;
+            border: 1px solid rgba(167, 139, 250, 0.25);
+            border-radius: 20px;
+            color: #c4b5fd;
+            background: rgba(124, 58, 237, 0.08);
+            font-size: 13px;
+        }
+
+        .detector-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            max-width: 1100px;
+        }
+
+        .detector-card {
+            background: rgba(17, 17, 27, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .detector-card h2 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+
+        .detector-card label {
+            display: block;
+            margin: 20px 0 8px;
+            color: #d4d4d8;
+            font-size: 14px;
+        }
+
+        .algorithm-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px 15px;
+            border-radius: 10px;
+            border: 1px solid #27272a;
+            background: #09090b;
+            color: #f4f4f5;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .algorithm-input:focus {
+            border-color: #8b5cf6;
+            box-shadow:
+                0 0 0 3px rgba(139, 92, 246, 0.12);
+        }
+
+        .analyze-btn {
+            width: 100%;
+            margin-top: 18px;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background:
+                linear-gradient(
+                    135deg,
+                    #7c3aed,
+                    #9333ea
+                );
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .analyze-btn:hover {
+            opacity: 0.92;
+        }
+
+        .result-box {
+            display: none;
+            margin-top: 22px;
+            padding: 20px;
+            border-radius: 12px;
+            background: #09090b;
+            border: 1px solid #27272a;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .result-status {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .result-algorithm {
+            color: #a1a1aa;
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
+
+        .result-message {
+            color: #d4d4d8;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .recommendation {
+            margin-top: 18px;
+            padding: 14px;
+            border-left: 3px solid #8b5cf6;
+            background: rgba(139, 92, 246, 0.08);
+            color: #ddd6fe;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .severity-high {
+            color: #f87171;
+        }
+
+        .severity-medium {
+            color: #fbbf24;
+        }
+
+        .severity-low {
+            color: #4ade80;
+        }
+
+        .known-list {
+            margin-top: 20px;
+        }
+
+        .known-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 13px 0;
+            border-bottom: 1px solid #27272a;
+        }
+
+        .known-item:last-child {
+            border-bottom: none;
+        }
+
+        .algorithm-name {
+            font-weight: 600;
+        }
+
+        .algorithm-status {
+            font-size: 12px;
+            padding: 5px 9px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .info-box {
+            margin-top: 25px;
+            max-width: 1100px;
+            padding: 18px 20px;
+            border-radius: 14px;
+            background: rgba(59, 130, 246, 0.06);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            color: #a1a1aa;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 800px) {
+
+            .detector-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detector-header h1 {
+                font-size: 32px;
+            }
+
+            .detector-page {
+                padding: 30px 5%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         CIPHER VAULT NAVBAR
+         ===================================================== -->
+
+    {% include "components/navbar.html" %}
+
+
+    <!-- =====================================================
+         DETECTOR PAGE
+         ===================================================== -->
+
+    <div class="detector-page">
+
+
+        <!-- HEADER -->
+
+        <div class="detector-header">
+
+            <a
+                href="{{ url_for('main.home') }}"
+                class="back-link"
+            >
+                ← Back to CipherVault
+            </a>
+
+            <h1>
+                Weak Crypto Detector
+            </h1>
+
+            <p>
+                Identify outdated or weak cryptographic algorithms
+                and understand what should be used instead.
+            </p>
+
+            <div class="tag-row">
+
+                <span class="tag">
+                    Algorithm Analysis
+                </span>
+
+                <span class="tag">
+                    Weak Crypto Detection
+                </span>
+
+                <span class="tag">
+                    Security Recommendations
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             MAIN GRID
+             ================================================= -->
+
+        <div class="detector-grid">
+
+
+            <!-- =================================================
+                 ANALYZER
+                 ================================================= -->
+
+            <div class="detector-card">
+
+                <h2>
+                    🔍 Analyze Algorithm
+                </h2>
+
+                <p
+                    style="color:#a1a1aa; font-size:14px;"
+                >
+                    Enter a cryptographic algorithm to check its
+                    security status.
+                </p>
+
+
+                <label for="algorithm">
+                    Cryptographic Algorithm
+                </label>
+
+                <input
+                    type="text"
+                    id="algorithm"
+                    class="algorithm-input"
+                    placeholder="Example: MD5"
+                    autocomplete="off"
+                >
+
+
+                <button
+                    id="analyze-button"
+                    class="analyze-btn"
+                    type="button"
+                >
+                    Analyze Security
+                </button>
+
+
+                <!-- RESULT -->
+
+                <div
+                    id="result-box"
+                    class="result-box"
+                >
+
+                    <div
+                        id="result-status"
+                        class="result-status"
+                    >
+                    </div>
+
+                    <div
+                        id="result-algorithm"
+                        class="result-algorithm"
+                    >
+                    </div>
+
+                    <div
+                        id="result-message"
+                        class="result-message"
+                    >
+                    </div>
+
+                    <div
+                        id="recommendation"
+                        class="recommendation"
+                    >
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 KNOWN ALGORITHMS
+                 ================================================= -->
+
+            <div class="detector-card">
+
+                <h2>
+                    Security Reference
+                </h2>
+
+                <p
+                    style="color:#a1a1aa; font-size:14px;"
+                >
+                    Algorithms currently covered by the
+                    CipherVault detector.
+                </p>
+
+
+                <div class="known-list">
+
+
+                    <div class="known-item">
+
+                        <span class="algorithm-name">
+                            MD5
+                        </span>
+
+                        <span class="algorithm-status severity-high">
+                            Weak
+                        </span>
+
+                    </div>
+
+
+                    <div class="known-item">
+
+                        <span class="algorithm-name">
+                            SHA-1
+                        </span>
+
+                        <span class="algorithm-status severity-high">
+                            Weak
+                        </span>
+
+                    </div>
+
+
+                    <div class="known-item">
+
+                        <span class="algorithm-name">
+                            DES
+                        </span>
+
+                        <span class="algorithm-status severity-high">
+                            Weak
+                        </span>
+
+                    </div>
+
+
+                    <div class="known-item">
+
+                        <span class="algorithm-name">
+                            3DES
+                        </span>
+
+                        <span class="algorithm-status severity-medium">
+                            Deprecated
+                        </span>
+
+                    </div>
+
+
+                    <div class="known-item">
+
+                        <span class="algorithm-name">
+                            RC4
+                        </span>
+
+                        <span class="algorithm-status severity-high">
+                            Weak
+                        </span>
+
+                    </div>
+
+
+                    <div class="known-item">
+
+                        <span class="algorithm-name">
+                            AES-256-GCM
+                        </span>
+
+                        <span class="algorithm-status severity-low">
+                            Strong
+                        </span>
+
+                    </div>
+
+
+                    <div class="known-item">
+
+                        <span class="algorithm-name">
+                            SHA-256
+                        </span>
+
+                        <span class="algorithm-status severity-low">
+                            Strong
+                        </span>
+
+                    </div>
+
+
+                    <div class="known-item">
+
+                        <span class="algorithm-name">
+                            SHA-512
+                        </span>
+
+                        <span class="algorithm-status severity-low">
+                            Strong
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SECURITY NOTE
+             ================================================= -->
+
+        <div class="info-box">
+
+            <strong>
+                Security note:
+            </strong>
+
+            CipherVault provides an educational rule-based
+            assessment. A cryptographic algorithm's security
+            also depends on its implementation, configuration,
+            key management, protocol, and intended use.
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
+
+    <script>
+
+
+        const algorithmInput =
+            document.getElementById("algorithm");
+
+
+        const analyzeButton =
+            document.getElementById("analyze-button");
+
+
+        const resultBox =
+            document.getElementById("result-box");
+
+
+        const resultStatus =
+            document.getElementById("result-status");
+
+
+        const resultAlgorithm =
+            document.getElementById("result-algorithm");
+
+
+        const resultMessage =
+            document.getElementById("result-message");
+
+
+        const recommendation =
+            document.getElementById("recommendation");
+
+
+        // ==========================================
+        // CSRF TOKEN
+        // ==========================================
+
+        const csrfToken =
+            document
+                .querySelector('meta[name="csrf-token"]')
+                .getAttribute("content");
+
+
+        // ==========================================
+        // DISPLAY RESULT
+        // ==========================================
+
+        function showResult(result) {
+
+            resultBox.classList.add("show");
+
+            resultAlgorithm.textContent =
+                "Algorithm: " + result.algorithm;
+
+            resultMessage.textContent =
+                result.message;
+
+            recommendation.textContent =
+                "Recommendation: " +
+                result.recommendation;
+
+
+            if (result.status === "Weak") {
+
+                resultStatus.textContent =
+                    "⚠️ " + result.status;
+
+                resultStatus.className =
+                    "result-status severity-high";
+
+            }
+
+            else if (result.status === "Deprecated") {
+
+                resultStatus.textContent =
+                    "⚠️ " + result.status;
+
+                resultStatus.className =
+                    "result-status severity-medium";
+
+            }
+
+            else if (result.status === "Strong") {
+
+                resultStatus.textContent =
+                    "✓ " + result.status;
+
+                resultStatus.className =
+                    "result-status severity-low";
+
+            }
+
+            else {
+
+                resultStatus.textContent =
+                    "ℹ " + result.status;
+
+                resultStatus.className =
+                    "result-status severity-medium";
+
+            }
+
+        }
+
+
+        // ==========================================
+        // ANALYZE ALGORITHM
+        // ==========================================
+
+        async function analyzeAlgorithm() {
+
+            const algorithm =
+                algorithmInput.value.trim();
+
+
+            if (!algorithm) {
+
+                resultBox.classList.add("show");
+
+                resultStatus.textContent =
+                    "Please enter an algorithm.";
+
+                resultStatus.className =
+                    "result-status severity-medium";
+
+                resultAlgorithm.textContent = "";
+
+                resultMessage.textContent = "";
+
+                recommendation.textContent = "";
+
+                return;
+            }
+
+
+            analyzeButton.disabled = true;
+
+            analyzeButton.textContent =
+                "Analyzing...";
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "{{ url_for('main.api_analyze_crypto') }}",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json",
+
+                                "X-CSRFToken":
+                                    csrfToken
+                            },
+
+                            body: JSON.stringify({
+                                algorithm: algorithm
+                            })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!data.success) {
+
+                    throw new Error(
+                        data.error ||
+                        "Unable to analyze algorithm."
+                    );
+
+                }
+
+
+                showResult(data.result);
+
+            }
+
+
+            catch (error) {
+
+                resultBox.classList.add("show");
+
+                resultStatus.textContent =
+                    "Analysis Error";
+
+                resultStatus.className =
+                    "result-status severity-high";
+
+                resultAlgorithm.textContent = "";
+
+                resultMessage.textContent =
+                    error.message;
+
+                recommendation.textContent = "";
+
+            }
+
+
+            finally {
+
+                analyzeButton.disabled = false;
+
+                analyzeButton.textContent =
+                    "Analyze Security";
+
+            }
+
+        }
+
+
+        // ==========================================
+        // BUTTON EVENT
+        // ==========================================
+
+        analyzeButton.addEventListener(
+            "click",
+            analyzeAlgorithm
+        );
+
+
+        // ==========================================
+        // ENTER KEY
+        // ==========================================
+
+        algorithmInput.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (event.key === "Enter") {
+
+                    analyzeAlgorithm();
+
+                }
+
+            }
+        );
+
+
+    </script>
+
+
+</body>
+
+</html>

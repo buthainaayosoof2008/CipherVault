@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Security Report | CipherVault</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- CSRF Token -->
+    <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}"
+    >
+
+    <style>
+        .report-page {
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 40px 24px 70px;
+        }
+
+        .report-header {
+            margin-bottom: 30px;
+        }
+
+        .report-header h1 {
+            font-size: 36px;
+            margin: 20px 0 10px;
+        }
+
+        .report-header p {
+            color: #a9b1c6;
+            line-height: 1.6;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 18px;
+            padding: 26px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin: 18px 0 8px;
+            font-weight: 600;
+        }
+
+        select,
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #30384d;
+            background: #0b1020;
+            color: white;
+            outline: none;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: #8b5cf6;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 18px 0;
+        }
+
+        .checkbox-row input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .generate-button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 10px;
+            background: #7c3aed;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .generate-button:hover {
+            background: #6d28d9;
+        }
+
+        .report-document {
+            background: #0b1020;
+            border: 1px solid #252d40;
+            border-radius: 14px;
+            padding: 26px;
+        }
+
+        .report-title {
+            border-bottom: 1px solid #30384d;
+            padding-bottom: 18px;
+            margin-bottom: 22px;
+        }
+
+        .report-title h2 {
+            margin: 0 0 7px;
+        }
+
+        .report-title p {
+            color: #929bb0;
+            margin: 0;
+            font-size: 13px;
+        }
+
+        .report-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 13px 0;
+            border-bottom: 1px solid #20283a;
+        }
+
+        .report-label {
+            color: #929bb0;
+        }
+
+        .report-value {
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .score-box {
+            text-align: center;
+            margin: 25px 0;
+            padding: 22px;
+            border-radius: 14px;
+            background: rgba(124, 58, 237, 0.08);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .score-number {
+            font-size: 48px;
+            font-weight: 800;
+        }
+
+        .rating {
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        .section-title {
+            margin-top: 28px;
+            margin-bottom: 12px;
+        }
+
+        .finding {
+            padding: 12px 14px;
+            margin-bottom: 9px;
+            border-radius: 9px;
+            background: #111827;
+            border: 1px solid #252d40;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .report-note {
+            margin-top: 22px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(234, 179, 8, 0.07);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+            color: #cbd5e1;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .status {
+            margin-top: 14px;
+            text-align: center;
+            color: #f87171;
+            font-size: 13px;
+        }
+
+        .empty-report {
+            color: #929bb0;
+            text-align: center;
+            padding: 80px 20px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 850px) {
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+{% include "components/navbar.html" %}
+
+<div class="report-page">
+
+    <div class="report-header">
+
+        <a
+            href="{{ url_for('main.home') }}"
+            style="color:#a78bfa; text-decoration:none;"
+        >
+            ← Back to CipherVault
+        </a>
+
+        <h1>Security Report</h1>
+
+        <p>
+            Generate an educational cryptographic security assessment
+            based on the selected configuration.
+        </p>
+
+    </div>
+
+
+    <div class="report-grid">
+
+        <!-- CONFIGURATION -->
+
+        <div class="card">
+
+            <h2>Assessment Configuration</h2>
+
+            <label for="algorithm">
+                Algorithm
+            </label>
+
+            <select id="algorithm">
+
+                <option value="aes-256-gcm">
+                    AES-256-GCM
+                </option>
+
+                <option value="aes-256">
+                    AES-256
+                </option>
+
+                <option value="sha-256">
+                    SHA-256
+                </option>
+
+                <option value="sha-512">
+                    SHA-512
+                </option>
+
+                <option value="md5">
+                    MD5
+                </option>
+
+                <option value="sha1">
+                    SHA-1
+                </option>
+
+                <option value="des">
+                    DES
+                </option>
+
+                <option value="3des">
+                    3DES
+                </option>
+
+                <option value="rc4">
+                    RC4
+                </option>
+
+            </select>
+
+
+            <label for="keyLength">
+                Key Length
+            </label>
+
+            <input
+                type="number"
+                id="keyLength"
+                value="256"
+                min="1"
+            >
+
+
+            <div class="checkbox-row">
+
+                <input
+                    type="checkbox"
+                    id="authentication"
+                    checked
+                >
+
+                <label for="authentication">
+                    Authenticated encryption enabled
+                </label>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="generate-button"
+                onclick="generateReport()"
+            >
+                Generate Security Report
+            </button>
+
+
+            <div
+                id="status"
+                class="status"
+            ></div>
+
+        </div>
+
+
+        <!-- REPORT -->
+
+        <div class="card">
+
+            <div
+                id="reportContainer"
+                class="empty-report"
+            >
+
+                Configure the assessment and click
+                <strong>Generate Security Report</strong>
+                to create the report.
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+async function generateReport() {
+
+    const algorithm =
+        document.getElementById("algorithm").value;
+
+    const keyLength =
+        document.getElementById("keyLength").value;
+
+    const authentication =
+        document.getElementById("authentication").checked;
+
+    const status =
+        document.getElementById("status");
+
+    const container =
+        document.getElementById("reportContainer");
+
+    status.textContent = "";
+
+
+    try {
+
+        const response = await fetch(
+            "{{ url_for('main.api_security_report') }}",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document
+                        .querySelector('meta[name="csrf-token"]')
+                        .getAttribute("content")
+                },
+
+                body: JSON.stringify({
+                    algorithm: algorithm,
+                    key_length: keyLength,
+                    authentication: authentication
+                })
+            }
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.success) {
+
+            status.textContent =
+                data.error ||
+                "Unable to generate report.";
+
+            return;
+        }
+
+
+        const report =
+            data.report;
+
+
+        let findingsHTML = "";
+
+
+        report.findings.forEach(
+            function(finding) {
+
+                findingsHTML += `
+                    <div class="finding">
+                        ${escapeHtml(finding)}
+                    </div>
+                `;
+
+            }
+        );
+
+
+        container.className =
+            "report-document";
+
+
+        container.innerHTML = `
+
+            <div class="report-title">
+
+                <h2>
+                    ${escapeHtml(report.title)}
+                </h2>
+
+                <p>
+                    Generated:
+                    ${escapeHtml(report.generated_at)}
+                </p>
+
+            </div>
+
+
+            <div class="report-row">
+
+                <span class="report-label">
+                    Algorithm
+                </span>
+
+                <span class="report-value">
+                    ${escapeHtml(report.algorithm)}
+                </span>
+
+            </div>
+
+
+            <div class="report-row">
+
+                <span class="report-label">
+                    Key Length
+                </span>
+
+                <span class="report-value">
+                    ${escapeHtml(String(report.key_length))} bits
+                </span>
+
+            </div>
+
+
+            <div class="report-row">
+
+                <span class="report-label">
+                    Authentication
+                </span>
+
+                <span class="report-value">
+                    ${escapeHtml(report.authenticated_encryption)}
+                </span>
+
+            </div>
+
+
+            <div class="score-box">
+
+                <div class="score-number">
+                    ${escapeHtml(String(report.security_score))}
+                </div>
+
+                <div>
+                    / 100
+                </div>
+
+                <div class="rating">
+                    ${escapeHtml(report.rating)}
+                </div>
+
+            </div>
+
+
+            <h3 class="section-title">
+                Security Findings
+            </h3>
+
+            ${findingsHTML}
+
+
+            <div class="report-note">
+
+                <strong>Assessment Note:</strong><br>
+
+                ${escapeHtml(report.note)}
+
+            </div>
+
+        `;
+
+    }
+
+    catch (error) {
+
+        status.textContent =
+            "Unable to connect to CipherVault.";
+
+    }
+
+}
+
+
+function escapeHtml(value) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent = value;
+
+    return div.innerHTML;
+}
+
+</script>
+
+</body>
+</html>
